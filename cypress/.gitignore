@@ -1,0 +1,40 @@
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Diretórios de build e cache
+dist/
+build/
+.cache/
+.tmp/
+
+# Cypress
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+cypress/contracts/
+
+# Ambiente e configurações locais
+.env
+.env.local
+.env.*.local
+
+# IDEs e editores
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de lock (se não quiser versionar)
+package-lock.json
+yarn.lock
+
+node_modules/
