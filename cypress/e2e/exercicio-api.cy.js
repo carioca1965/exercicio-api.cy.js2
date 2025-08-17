@@ -2,8 +2,6 @@
 
 describe('Testes da Funcionalidade Usuários', () => {
 
-  let usuarioId;
-
   it('Deve validar contrato de usuários', () => {
     cy.request('GET', '/usuarios').then((response) => {
       expect(response.status).to.eq(200);
@@ -32,7 +30,6 @@ describe('Testes da Funcionalidade Usuários', () => {
     cy.request('POST', '/usuarios', usuario).then((response) => {
       expect(response.status).to.eq(201);
       expect(response.body.message).to.eq('Cadastro realizado com sucesso');
-      usuarioId = response.body._id;
     });
   });
 
@@ -55,25 +52,67 @@ describe('Testes da Funcionalidade Usuários', () => {
     });
   });
 
-  it('Deve editar um usuário previamente cadastrado', () => {
-    const novoUsuario = {
-      nome: 'Carlos Editado',
-      email: `editado${Date.now()}@teste.com`,
-      password: '654321',
-      administrador: 'false'
+  it('Deve editar um usuário cadastrado no próprio teste', () => {
+    const email = `editar${Date.now()}@teste.com`;
+
+    cy.request('POST', '/usuarios', {
+      nome: 'Carlos Editar',
+      email: email,
+      password: '123456',
+      administrador: 'true'
+    }).then((response) => {
+      const id = response.body._id;
+
+      cy.request('PUT', `/usuarios/${id}`, {
+        nome: 'Carlos Editado',
+        email: `editado${Date.now()}@teste.com`,
+        password: '654321',
+        administrador: 'false'
+      }).then((response) => {
+        expect(response.status).to.eq(200);
+        expect(response.body.message).to.eq('Registro alterado com sucesso');
+      });
+    });
+  });
+
+  it('Deve deletar um usuário cadastrado no próprio teste', () => {
+    const email = `deletar${Date.now()}@teste.com`;
+
+    cy.request('POST', '/usuarios', {
+      nome: 'Carlos Deletar',
+      email: email,
+      password: '123456',
+      administrador: 'true'
+    }).then((response) => {
+      const id = response.body._id;
+
+      cy.request('DELETE', `/usuarios/${id}`).then((response) => {
+        expect(response.status).to.eq(200);
+        expect(response.body.message).to.eq('Registro excluído com sucesso');
+      });
+    });
+  });
+  it('Não deve permitir cadastro com email duplicado', () => {
+    const email = `duplicado${Date.now()}@teste.com`;
+    const usuario = {
+      nome: 'Carlos Duplicado',
+      email: email,
+      password: '123456',
+      administrador: 'true'
     };
 
-    cy.request('PUT', `/usuarios/${usuarioId}`, novoUsuario).then((response) => {
-      expect(response.status).to.eq(200);
-      expect(response.body.message).to.eq('Registro alterado com sucesso');
+    cy.request('POST', '/usuarios', usuario).then(() => {
+      cy.request({
+        method: 'POST',
+        url: '/usuarios',
+        body: usuario,
+        failOnStatusCode: false
+      }).then((response) => {
+        expect(response.status).to.eq(400);
+        expect(response.body.message).to.eq('Este email já está sendo usado');
+      });
     });
   });
 
-  it('Deve deletar um usuário previamente cadastrado', () => {
-    cy.request('DELETE', `/usuarios/${usuarioId}`).then((response) => {
-      expect(response.status).to.eq(200);
-      expect(response.body.message).to.eq('Registro excluído com sucesso');
-    });
-  });
 
 });
